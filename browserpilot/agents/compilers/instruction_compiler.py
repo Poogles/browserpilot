@@ -138,9 +138,9 @@ class InstructionCompiler:
             # instructions. Be sure to pre-load the `history` and
             # `finished_instructions` instance variables for `retry`.
             if "compiled" in self.instructions:
-                assert isinstance(self.instructions["compiled"], list), (
-                    "Compiled instructions must be a list of strings."
-                )
+                assert isinstance(
+                    self.instructions["compiled"], list
+                ), "Compiled instructions must be a list of strings."
                 self.compiled_instructions = self.instructions["compiled"]
                 self.history.append(
                     {
@@ -267,7 +267,14 @@ class InstructionCompiler:
         return final_queue
 
     def get_completion(
-        self, prompt, model=None, temperature=0, max_tokens=1024, stop=["```"], use_cache=True
+        self,
+        prompt,
+        model=None,
+        temperature=0,
+        max_tokens=1024,
+        stop=["```"],
+        use_cache=True,
+        chat_client=None,
     ):
         """Wrapper over OpenAI's completion API."""
         if model is None:
@@ -279,6 +286,7 @@ class InstructionCompiler:
             text = self.api_cache[prompt]
             return text
 
+        breakpoint()
         try:
             if "gpt-3.5-turbo" in model or "gpt-4" in model:
                 response = openai.ChatCompletion.create(
@@ -331,7 +339,9 @@ class InstructionCompiler:
         prompt = self.base_prompt.format(instructions=instructions)
         completion = self.get_completion(prompt).strip()
         action_output = completion.strip()
-        lines = [line for line in action_output.split("\n") if not line.startswith("import ")]
+        lines = [
+            line for line in action_output.split("\n") if not line.startswith("import ")
+        ]
         action_output = "\n".join(lines)
         return {
             "instruction": instructions,
